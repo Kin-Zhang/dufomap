@@ -80,13 +80,13 @@ Please cite our works if you find these useful for your research.
 
 ```
 @article{daniel2024dufomap,
-  author={Duberg, Daniel and Zhang, Qingwen and Jia, MingKai and Jensfelt, Patric},
+  author={Duberg, Daniel and Zhang, Qingwen and Jia, Mingkai and Jensfelt, Patric},
   journal={IEEE Robotics and Automation Letters}, 
   title={{DUFOMap}: Efficient Dynamic Awareness Mapping}, 
   year={2024},
-  volume={},
-  number={},
-  pages={1-8},
+  volume={9},
+  number={6},
+  pages={5038-5045},
   doi={10.1109/LRA.2024.3387658}
 }
 @article{duberg2020ufomap,
