@@ -38,7 +38,7 @@ Clone and init submodule quickly:
 git clone --recursive -b main --single-branch https://github.com/Kin-Zhang/dufomap.git
 
 # 在内地的同学可以尝试下面gitee加速：
-git clone --recursive -b main --single-branch https://gitee.com/kin_zhang/dufomap
+git clone --recursive -b main --single-branch https://gitee.com/kin-zhang/dufomap
 ```
 
 ## 1. Build & Run
