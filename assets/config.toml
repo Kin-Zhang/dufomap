@@ -36,4 +36,5 @@ debug = false
 
 [output]
 filename = "dufomap_output"
+voxel_map = false # whether to save the voxel map or raw point level
 raycasting = false

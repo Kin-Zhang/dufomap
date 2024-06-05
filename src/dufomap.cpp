@@ -59,9 +59,10 @@ struct Printing {
 };
 
 struct Output {
-	std::string filename   = "output";
+	std::string filename   = "dufomap";
 	bool        has_color  = false;
 	bool        raycasting = false;
+	bool        voxel_map  = false;
 };
 
 struct Config {
@@ -129,6 +130,7 @@ struct Config {
 		output.filename   = read(tbl["output"]["filename"], output.filename);
 		output.has_color  = read(tbl["output"]["has_color"], output.has_color);
 		output.raycasting = read(tbl["output"]["raycasting"], output.raycasting);
+		output.voxel_map = read(tbl["output"]["voxel_map"], output.voxel_map);
 	}
 
 	void save() const
@@ -379,10 +381,17 @@ int main(int argc, char* argv[])
 	};
 	
 	for (std::size_t i{}; std::string filename : pcds) {
-		bar.set_progress(100 * i / pcds.size());
+		// FIXME: looks like unicode::display_width will have some influence on the algorithm, haven't figure out yet.
+		// bar.set_progress(100 * i / pcds.size());
 		++i;
-		timing.setTag("Total " + std::to_string(i) + " of " + std::to_string(pcds.size()) +
-		              " (" + std::to_string(100 * i / pcds.size()) + "%)");
+        if(i>1 && !config.printing.verbose){
+            std::ostringstream log_msg;
+            log_msg << "(" << i << "/" << pcds.size() << ") Processing: " << filename << " Time Cost: " 
+                << config.integration.timing.lastSeconds() << "s";
+            std::string spaces(10, ' ');
+            log_msg << spaces;
+            std::cout << "\r" <<log_msg.str() << std::flush;
+        }
 
 		ufo::PointCloudColor cloud;
 		ufo::Pose6f          viewpoint;
@@ -396,6 +405,8 @@ int main(int argc, char* argv[])
 		                      config.propagate);
 
 		if (config.printing.verbose) {
+			timing.setTag("Total " + std::to_string(i) + " of " + std::to_string(pcds.size()) +
+						" (" + std::to_string(100 * i / pcds.size()) + "%)");
 			timing[2] = config.integration.timing;
 			timing.print(true, true, 2, 4);
 		}
@@ -418,11 +429,20 @@ int main(int argc, char* argv[])
 	timing[5].start("Query");
 	ufo::PointCloudColor cloud_static;
 
-	for (auto& p : cloud_acc) {
-		if (!map.seenFree(p))
-			cloud_static.push_back(p);
+	if (config.output.voxel_map){
+		// save voxel map: based on the config resolution
+		for (auto node : map.query(
+				ufo::pred::Leaf(0) && !ufo::pred::SeenFree() && ufo::pred::HitsMin(1))) {
+			auto p = map.center(node);
+			cloud_static.emplace_back(p, ufo::Color(255, 255, 255));
+		}
+		config.output.filename += "_voxel";
 	}
-
+	else{
+		for (auto& p : cloud_acc)
+			if (!map.seenFree(p))
+				cloud_static.push_back(p);
+	}
 	timing[5].stop();
 
 	timing[6].start("write");
