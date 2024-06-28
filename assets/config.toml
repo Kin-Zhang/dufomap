@@ -16,9 +16,6 @@ max_range = -1                        # Maximum range to integrate
 only_valid = false                    # Only do ray casting for points within 'max_range'
 hit_depth = 0                         # Level of the octree to integrate hits
 miss_depth = 0                        # Level of the octree to integrate misses
-ray_casting_depth = 0                 # Level of the octree to perform ray casting
-simple_ray_casting = false
-simple_ray_casting_factor = 1.0
 parallel = true                       # Use parallel execution for integration
 num_threads = 0                       # Number of threads to use, 8 times number of physical cores seems to be a good number and it is chosen if 0 is given
 
