@@ -21,6 +21,15 @@ Quick Demo: Run with the **same parameter setting** without tuning for different
 
 ## 0. Setup
 
+Clone and init submodule quickly:
+```bash
+git clone --recursive -b main --single-branch https://github.com/Kin-Zhang/dufomap.git
+
+# 在内地的同学可以尝试下面gitee加速：
+git clone --recursive -b main --single-branch https://gitee.com/kin-zhang/dufomap
+```
+
+Choose setup on your own environment or inside docker.
 
 ### Environment
 
@@ -31,15 +40,26 @@ sudo apt update && sudo apt install gcc-10 g++-10
 sudo apt install libtbb-dev liblz4-dev liblzf-dev
 ```
 
-Dockerfile will be soon available.
+### Docker
 
-Clone and init submodule quickly:
+Dockerfile is provided, you can build or directly pull by:
+
 ```bash
-git clone --recursive -b main --single-branch https://github.com/Kin-Zhang/dufomap.git
+# option 1: build
+docker build -f Dockerfile -t zhangkin/dufomap .
 
-# 在内地的同学可以尝试下面gitee加速：
-git clone --recursive -b main --single-branch https://gitee.com/kin-zhang/dufomap
+# option 2: pull
+docker pull zhangkin/dufomap
 ```
+
+Then you can run a container with the following command:
+
+```bash
+docker run -it --rm --name dufomap -v /home/kin/data:/home/kin/data zhangkin/dufomap /bin/zsh
+# you can also login as root to install pkg in existing container you want through:
+docker exec -it -u 0 dufomap /bin/zsh
+```
+
 
 ## 1. Build & Run
 
