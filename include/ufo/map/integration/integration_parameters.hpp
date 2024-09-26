@@ -54,7 +54,6 @@
 
 namespace ufo
 {
-enum class RayCastingMethod { PROPER, SIMPLE };
 
 enum class DownSamplingMethod { NONE, CENTER, CENTROID, UNIFORM };
 
@@ -63,7 +62,6 @@ struct IntegrationParams {
 
 	depth_t hit_depth{};
 	depth_t miss_depth{};
-	depth_t ray_casting_depth{};
 
 	// Min range to integrate
 	float min_range{0};
@@ -73,9 +71,6 @@ struct IntegrationParams {
 	bool only_valid{false};
 
 	float early_stop_distance{0.0f};
-
-	RayCastingMethod ray_casting_method{RayCastingMethod::PROPER};
-	float            simple_ray_casting_factor{1.0f};
 
 	bool ray_passthrough_hits{true};
 

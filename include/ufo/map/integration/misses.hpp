@@ -184,7 +184,66 @@ Misses getMisses(CodeUnorderedMap<Grid> const& free_grids,
 	} else
 #endif
 	{
-		// TODO: Implement
+    for (auto const& [code, free_grid] : free_grids) {
+        auto it = hit_grids.find(code);
+        Grid const& hit_grid = (it != std::cend(hit_grids)) ? it->second : empty_grid;
+
+        auto hg_it = std::cbegin(hit_grid);
+        for (code_t i = code.code(); auto const m : free_grid) {
+            if (0 == m) {
+                i += inc;
+                ++hg_it;
+                continue;
+            }
+
+            auto const h = ~(*hg_it);
+
+            std::array<std::uint_fast8_t, 8> mf{};
+
+#include <ufo/map/integration/misses/1.hpp>
+
+            BitSet<8> const field(static_cast<BitSet<8>::T>(
+                // clang-format off
+                 std::uint8_t(isMaskSet(mf[0], 0xFFu)) 
+                | (std::uint8_t(isMaskSet(mf[1], 0xFFu)) << 1) 
+                | (std::uint8_t(isMaskSet(mf[2], 0xFFu)) << 2) 
+                | (std::uint8_t(isMaskSet(mf[3], 0xFFu)) << 3) 
+                | (std::uint8_t(isMaskSet(mf[4], 0xFFu)) << 4) 
+                | (std::uint8_t(isMaskSet(mf[5], 0xFFu)) << 5) 
+                | (std::uint8_t(isMaskSet(mf[6], 0xFFu)) << 6) 
+                | (std::uint8_t(isMaskSet(mf[7], 0xFFu)) << 7)
+                // clang-format on
+            ));
+
+            if (field.any()) {
+                misses.emplace_back(Code(i, depth + 1), field, 1);
+            }
+
+            if (!field.all()) {
+                for (code_t j{}, k{}; 64 != j; j += 8, ++k) {
+                    if (!std::as_const(field)[k] && (0xFF & mf[k])) {
+                        BitSet<8> f(static_cast<BitSet<8>::T>(
+                            // clang-format off
+                            (0x1u  & mf[k]) 
+                            | (0x2u  & mf[k]) 
+                            | (0x4u  & mf[k]) 
+                            | (0x8u  & mf[k]) 
+                            | (0x10u & mf[k]) 
+                            | (0x20u & mf[k]) 
+                            | (0x40u & mf[k]) 
+                            | (0x80u & mf[k])
+                            // clang-format on
+                        ));
+
+                        misses.emplace_back(Code(i | (j << 3 * depth), depth), f, 1);
+                    }
+                }
+            }
+
+            i += inc;
+            ++hg_it;
+        }
+    }
 	}
 
 	return misses;
@@ -195,7 +254,14 @@ Misses getMisses(std::size_t const             unknown_inflate,
                  CodeUnorderedMap<Grid> const& hit_grids, depth_t const depth,
                  std::size_t const num_threads)
 {
-#include <ufo/map/integration/misses/2.hpp>
+	switch (unknown_inflate) {
+		case 0: return getMisses<0>(free_grids, hit_grids, depth, num_threads);
+		case 1: return getMisses<1>(free_grids, hit_grids, depth, num_threads);
+		case 2: return getMisses<2>(free_grids, hit_grids, depth, num_threads);
+		case 3: return getMisses<3>(free_grids, hit_grids, depth, num_threads);
+		default: return getMisses<4>(free_grids, hit_grids, depth, num_threads);
+	}
+
 	return Misses();
 }
 }  // namespace ufo::impl

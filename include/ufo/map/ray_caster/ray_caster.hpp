@@ -77,7 +77,8 @@ void computeRay(CodeUnorderedMap<Grid>& grids, Point origin, Point goal, Key k_o
 	                          static_cast<key_t>(sgn(dir.z) * size)};
 
 	if (0 == step[0] && 0 == step[1] && 0 == step[2]) {
-		// TODO: What to do?
+		// NOTE: same origin and goal
+		return;
 	}
 
 	Vector3f t_max(
@@ -89,11 +90,13 @@ void computeRay(CodeUnorderedMap<Grid>& grids, Point origin, Point goal, Key k_o
 	                 step[1] ? grid_size / std::abs(dir.y) : max,
 	                 step[2] ? grid_size / std::abs(dir.z) : max);
 
-	// FIXME: Is this correct? Should it be zero if all zero?
-	std::size_t steps =
-	    (step[0] ? std::max(0.0f, std::ceil((distance - t_max[0]) / t_delta[0])) : 0) +
-	    (step[1] ? std::max(0.0f, std::ceil((distance - t_max[1]) / t_delta[1])) : 0) +
-	    (step[2] ? std::max(0.0f, std::ceil((distance - t_max[2]) / t_delta[2])) : 0);
+	// NOTE: all 0 already checked above by return.
+	std::size_t steps = 0;
+	if (step[0] != 0 || step[1] != 0 || step[2] != 0) {
+		steps = (step[0] ? std::max(0.0f, std::ceil((distance - t_max[0]) / t_delta[0])) : 0) +
+				(step[1] ? std::max(0.0f, std::ceil((distance - t_max[1]) / t_delta[1])) : 0) +
+				(step[2] ? std::max(0.0f, std::ceil((distance - t_max[2]) / t_delta[2])) : 0);
+	}
 
 	Code  prev_at_depth = Code(k_origin).toDepth(Grid::depth() + depth);
 	Grid* grid          = &grids[prev_at_depth];
@@ -111,24 +114,6 @@ void computeRay(CodeUnorderedMap<Grid>& grids, Point origin, Point goal, Key k_o
 		}
 		grid->set(cur);
 	}
-
-	// auto last = k_origin;
-
-	// std::size_t advance_dim{};
-	// while (std::max(last[advance_dim], k_origin[advance_dim]) -
-	//            std::min(last[advance_dim], k_origin[advance_dim]) !=
-	//        inflate_unknown) {
-	// 	advance_dim = t_max.minElementIndex();
-	// 	k_origin[advance_dim] += step[advance_dim];
-	// 	t_max[advance_dim] += t_delta[advance_dim];
-	// 	Code const cur = k_origin;
-
-	// 	if (!Code::equalAtDepth(prev_at_depth, cur, Grid::depth() + depth)) {
-	// 		grid          = &grids[cur.toDepth(Grid::depth() + depth)];
-	// 		prev_at_depth = cur.toDepth(Grid::depth() + depth);
-	// 	}
-	// 	grid->set(cur);
-	// }
 }
 
 void computeRay(CodeUnorderedMap<Grid>& grids, CodeUnorderedMap<Grid> const& hits,
@@ -151,7 +136,8 @@ void computeRay(CodeUnorderedMap<Grid>& grids, CodeUnorderedMap<Grid> const& hit
 	                          static_cast<key_t>(sgn(dir.z) * size)};
 
 	if (0 == step[0] && 0 == step[1] && 0 == step[2]) {
-		// TODO: What to do?
+		// NOTE: same origin and goal
+		return;
 	}
 
 	Vector3f t_max(
@@ -163,10 +149,13 @@ void computeRay(CodeUnorderedMap<Grid>& grids, CodeUnorderedMap<Grid> const& hit
 	                 step[1] ? grid_size / std::abs(dir.y) : max,
 	                 step[2] ? grid_size / std::abs(dir.z) : max);
 
-	// FIXME: Is this correct? Should it be zero if all zero?
-	std::size_t steps = (step[0] ? std::ceil((distance - t_max[0]) / t_delta[0]) : 0) +
-	                    (step[1] ? std::ceil((distance - t_max[1]) / t_delta[1]) : 0) +
-	                    (step[2] ? std::ceil((distance - t_max[2]) / t_delta[2]) : 0);
+	// NOTE: all 0 already checked above by return.
+	std::size_t steps = 0;
+	if (step[0] != 0 || step[1] != 0 || step[2] != 0) {
+		steps = (step[0] ? std::max(0.0f, std::ceil((distance - t_max[0]) / t_delta[0])) : 0) +
+				(step[1] ? std::max(0.0f, std::ceil((distance - t_max[1]) / t_delta[1])) : 0) +
+				(step[2] ? std::max(0.0f, std::ceil((distance - t_max[2]) / t_delta[2])) : 0);
+	}
 
 	Code  cur           = k_origin;
 	Code  prev_at_depth = cur.toDepth(Grid::depth() + depth);
@@ -224,34 +213,6 @@ void computeRay(CodeUnorderedMap<Grid>& grids, CodeUnorderedMap<Grid> const& hit
 	}
 }
 
-template <class Map>
-void computeRaySimple(Map const& map, CodeUnorderedMap<Grid>& grids, Point origin,
-                      Point goal, depth_t depth, float step_size,
-                      float max_distance        = std::numeric_limits<float>::max(),
-                      float early_stop_distance = 0.0f)
-{
-	Vector3f dir      = goal - origin;
-	float    distance = dir.norm();
-	dir /= distance;
-
-	distance = std::min(distance - early_stop_distance, max_distance);
-
-	std::size_t num_steps = static_cast<std::size_t>(distance / step_size);
-	Vector3f    step      = dir * step_size;
-
-	Code  prev_at_depth = map.toCode(origin, Grid::depth() + depth);
-	Grid* grid          = &grids[prev_at_depth];
-	grid->set(map.toCode(origin, depth));
-	for (std::size_t i{}; i != num_steps; ++i, origin += step) {
-		Code cur = map.toCode(origin, depth);
-
-		if (Code::equalAtDepth(prev_at_depth, cur, Grid::depth() + depth)) {
-			grid          = &grids[cur.toDepth(Grid::depth() + depth)];
-			prev_at_depth = cur.toDepth(Grid::depth() + depth);
-		}
-		grid->set(cur);
-	}
-}
 
 [[nodiscard]] std::vector<Code> computeRay(
     Key origin, Key goal, float max_distance = std::numeric_limits<float>::max(),
@@ -284,8 +245,7 @@ void computeRaySimple(Map const& map, CodeUnorderedMap<Grid>& grids, Point origi
 
 	Vector3f t_max = t_delta / 2.0f;
 
-	// ray.reserve(static_cast<KeyRay::size_type>(1.5 * Vector3f::abs(g - o).norm() /
-	// f_size));
+
 	std::vector<Code> ray;
 	ray.emplace_back(origin);
 	distance -= early_stop_distance;
@@ -302,73 +262,6 @@ void computeRaySimple(Map const& map, CodeUnorderedMap<Grid>& grids, Point origi
 	return ray;
 }
 
-[[nodiscard]] std::vector<Code> computeRaySimple(
-    Key origin, Key goal, float step_size_factor = 1.0f,
-    float max_distance = std::numeric_limits<float>::max(), std::size_t early_stop = 0,
-    float early_stop_distance = 0.0f)
-{
-	auto const depth = origin.depth();
-
-	assert(goal.depth() == depth);
-
-	Vector3f current(static_cast<float>(origin.x()), static_cast<float>(origin.y()),
-	                 static_cast<float>(origin.z()));
-	Vector3f last(static_cast<float>(goal.x()), static_cast<float>(goal.y()),
-	              static_cast<float>(goal.z()));
-
-	Vector3f dir      = last - current;
-	float    distance = dir.norm();
-	dir /= distance;
-
-	distance = std::min(distance, max_distance);
-
-	auto step_size = static_cast<float>(1U << depth) * step_size_factor;
-
-	std::size_t num_steps = static_cast<std::size_t>(
-	    (distance - std::min(distance, early_stop_distance)) / step_size);
-	Vector3f step = dir * step_size;
-
-	num_steps = num_steps - std::min(num_steps, early_stop);
-
-	if (0 == num_steps) {
-		return std::vector<Code>();
-	}
-
-	// FIXME: Should it take one more step?
-	std::vector<Code> ray;
-	ray.reserve(num_steps);
-	for (std::size_t i{}; i != num_steps; ++i, current += step) {
-		ray.emplace_back(Key(static_cast<key_t>(current.x), static_cast<key_t>(current.y),
-		                     static_cast<key_t>(current.z), depth));
-	}
-	return ray;
-}
-
-[[nodiscard]] std::vector<Point> computeRaySimple(
-    Point origin, Point goal, float step_size,
-    float max_distance = std::numeric_limits<float>::max(), std::size_t early_stop = 0,
-    float early_stop_distance = 0.0f)
-{
-	Vector3f dir      = goal - origin;
-	float    distance = dir.norm();
-	dir /= distance;
-
-	distance = std::min(distance, max_distance);
-
-	distance -= early_stop_distance;
-
-	std::size_t num_steps = static_cast<std::size_t>(distance / step_size);
-	num_steps -= std::min(num_steps, early_stop);
-	Vector3f step = dir * step_size;
-
-	// FIXME: Should it take one more step?
-	std::vector<Point> ray;
-	ray.reserve(num_steps);
-	for (std::size_t i{}; i != num_steps; ++i, origin += step) {
-		ray.push_back(origin);
-	}
-	return ray;
-}
 }  // namespace ufo
 
 #endif  // UFO_MAP_RAY_CASTER_HPP

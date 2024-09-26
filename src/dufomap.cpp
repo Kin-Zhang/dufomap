@@ -104,12 +104,6 @@ struct Config {
 		                                        integration.ray_passthrough_hits);
 		integration.inflate_hits_dist =
 		    read(tbl["important"]["inflate_hits_dist"], integration.inflate_hits_dist);
-		integration.ray_casting_method = read(tbl["integration"]["simple_ray_casting"], true)
-		                                     ? ufo::RayCastingMethod::SIMPLE
-		                                     : ufo::RayCastingMethod::PROPER;
-		integration.simple_ray_casting_factor =
-		    read(tbl["integration"]["simple_ray_casting_factor"],
-		         integration.simple_ray_casting_factor);
 		integration.parallel = tbl["integration"]["parallel"].value_or(integration.parallel);
 		integration.num_threads =
 		    read(tbl["integration"]["num_threads"], integration.num_threads);
@@ -206,12 +200,6 @@ std::ostream& operator<<(std::ostream& out, Config const& config)
 	    << '\n';
 	out << "\t\tEarly stop distance:         " << config.integration.early_stop_distance
 	    << '\n';
-	out << "\t\tSimple ray casting:          " << std::boolalpha
-	    << (ufo::RayCastingMethod::SIMPLE == config.integration.ray_casting_method ? true
-	                                                                               : false)
-	    << '\n';
-	out << "\t\tSimple ray casting factor:   "
-	    << config.integration.simple_ray_casting_factor << '\n';
 	out << "\t\tParallel:                    " << config.integration.parallel << '\n';
 	out << "\t\tNum threads:                 " << config.integration.num_threads << '\n';
 	out << "\t\tOnly valid:                  " << config.integration.only_valid << '\n';

@@ -219,8 +219,6 @@ template <class Map, class P>
 
 	Key const   origin_key          = map.toKey(sensor_origin, depth);
 	Point const origin_coord        = map.toCoord(origin_key);
-	float const step_size_factor    = params.simple_ray_casting_factor;
-	bool const  simple              = RayCastingMethod::SIMPLE == params.ray_casting_method;
 	float const early_stop_distance = params.early_stop_distance;
 	float const min_distance        = params.min_range;
 	float const max_distance =
