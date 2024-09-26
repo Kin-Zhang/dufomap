@@ -1,92 +1,70 @@
-<p align="center">
-  <h2 align="center">DUFOMap: Efficient Dynamic Awareness Mapping</h1>
-  <p align="center">
-    <a href="https://www.kth.se/profile/dduberg"><strong>Daniel Duberg</strong><sup>1,*</sup></a>&nbsp;&nbsp;&nbsp;
-    <a href="https://kin-zhang.github.io"><strong>Qingwen Zhang</strong><sup>1,*</sup></a>&nbsp;&nbsp;&nbsp;
-    <a href="https://github.com/MKJia"><strong>Mingkai Jia</strong><sup>2</sup></a>&nbsp;&nbsp;&nbsp;
-    <a href="https://www.kth.se/profile/patric"><strong>Patric Jensfelt</strong><sup>1</sup></a>&nbsp;&nbsp;&nbsp;
-    <br />
-    <sup>*</sup><strong>Co-first author</strong>&nbsp;&nbsp;&nbsp; <sup>1</sup><strong>KTH</strong>&nbsp;&nbsp;&nbsp; <sup>2</sup><strong>HKUST</strong>&nbsp;&nbsp;&nbsp;
-  </p>
-</p>
+DUFOMap Python Package
+---
 
-[![arXiv](https://img.shields.io/badge/arXiv-2403.01449-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2403.01449)
-[![page](https://img.shields.io/badge/Web-Page-green)](https://KTH-RPL.github.io/dufomap) [video coming soon] [poster coming soon]. Accepted by RA-L'24.
+[![arXiv](https://img.shields.io/badge/arXiv-2403.01449-b31b1b.svg)](https://arxiv.org/abs/2403.01449) 
+[![page](https://img.shields.io/badge/Web-Page-green)](https://kin-zhang.github.io/dufomap)
+[![Stable Version](https://img.shields.io/pypi/v/dufomap?label=stable)](https://pypi.org/project/dufomap/#history)
+[![Python Versions](https://img.shields.io/pypi/pyversions/dufomap)](https://pypi.org/project/dufomap/)
+[![Download Stats](https://img.shields.io/pypi/dm/dufomap)](https://pypistats.org/packages/dufomap)
 
-Quick Demo: Run with the **same parameter setting** without tuning for different sensor (e.g 16, 32, 64, and 128 channel LiDAR and Livox-series mid360), the following shows the data collected from:
+Author: [Qingwen Zhang](https://kin-zhang.github.io/). Please give us a star if you like this repo! 🌟 and [cite our work](#acknowledgement) 📖 if you find this useful for your research. Thanks!
 
-| Leica-RTC360 | 128-channel LiDAR | Livox-mid360 |
-| ------- | ------- | ------- |
-| ![](assets/imgs/dufomap_leica.gif) | ![](assets/imgs/doals_train_128.gif) | ![](assets/imgs/two_floor_mid360.gif) |
+Available in: <a href="https://github.com/Kin-Zhang/dufomap"><img src="https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black" /></a> <a href="https://github.com/Kin-Zhang/dufomap"><img src="https://img.shields.io/badge/Windows-0078D6?st&logo=windows&logoColor=white" /> 
 
-## 0. Setup
+All datasets and benchmark methods check: [DynamicMap_Benchmark](https://github.com/KTH-RPL/DynamicMap_Benchmark) if you are not only interested in the method but also the comparison.
 
+Note: to know better about the parameters meaning and ablation study, please check the [paper](https://arxiv.org/abs/2403.01449).
 
-### Environment
+📜 Change Log:
+- 2024-08-29: Remove OpenMP but add oneTBB for all codes. Speed up the code by 18%. Check the [discussion here](https://github.com/Kin-Zhang/dufomap/discussions/1).
+- 2024-08-28: Refactor the code and add `__init__.py` to have the input array must be contiguous first.
+- 2024-07-03: Speed up nanobind `np.array` <-> `std::vector<Eigen:: Vector3d>` conversion and also `NOMINSIZE` in make. Speed difference: 0.1s -> 0.01s. Based on [discussion here](https://github.com/wjakob/nanobind/discussions/426).
+- 2023-11-28: Initial version.
 
-Since Ranges (`std::range`) and `#include <concepts>` first existed in C++20 and GCC 10
+Installation:
 
 ```bash
-sudo apt update && sudo apt install gcc-10 g++-10
-sudo apt install libtbb-dev liblz4-dev liblzf-dev
+pip install dufomap
 ```
 
-Dockerfile will be soon available.
+## Run the example
 
-Clone and init submodule quickly:
-```bash
-git clone --recursive -b main --single-branch https://github.com/Kin-Zhang/dufomap.git
-
-# 在内地的同学可以尝试下面gitee加速：
-git clone --recursive -b main --single-branch https://gitee.com/kin-zhang/dufomap
+Demo usage:
+```python
+from dufomap import dufomap
+# pointcloud: Nx3 numpy array
+# pose: 4x4 numpy array or a list with 7 elements (x,y,z,qw,qx,qy,qz)
+mydufo = dufomap()
+mydufo.run(pointcloud, pose, cloud_transform=True)
+label = mydufo.segment(pointcloud, pose, cloud_transform = True)
+# 1: dynamic, 0: static
 ```
 
-## 1. Build & Run
-
-Build:
-
-```bash
-cmake -B build -D CMAKE_CXX_COMPILER=g++-10 && cmake --build build
-```
-
-Prepare Data: Teaser data (KITTI 00: 384.4Mb) can be downloaded via follow commands, more data detail can be found in the [dataset section](https://github.com/KTH-RPL/DynamicMap_Benchmark?tab=readme-ov-file#dataset--scripts) or format your own dataset follow [custom dataset section](https://github.com/KTH-RPL/DynamicMap_Benchmark/blob/master/scripts/README.md#custom-dataset).
+Or you can check the full example script in [example.py]. If you run the example script, it will directly show a default effect of demo data.
 
 ```bash
-wget https://zenodo.org/records/8160051/files/00.zip
-unzip 00.zip -d data
+# for this demo you need install open3d to run the visualization
+pip install open3d fire
+
+wget https://zenodo.org/records/10886629/files/00.zip
+unzip 00.zip
+python example.py --data_dir ./00
 ```
 
-Run:
-
-```bash
-./build/dufomap_run data/00 assets/config.toml
-```
-
-![dufomap](assets/demo.png)
-
-## 2. Evaluation
-
-Please reference to [DynamicMap_Benchmark](https://github.com/KTH-RPL/DynamicMap_Benchmark) for the evaluation of DUFOMap and comparison with other dynamic removal  methods.
-
-[Evaluation Section link](https://github.com/KTH-RPL/DynamicMap_Benchmark/blob/master/scripts/README.md#evaluation)
+![dufomap_py](https://github.com/user-attachments/assets/bc921c8d-0dbd-4813-9c09-9ad0d051e71d)
 
 
-## Acknowledgements
+## Acknowledgement
 
-Thanks to HKUST Ramlab's members: Bowen Yang, Lu Gan, Mingkai Tang, and Yingbing Chen, who help collect additional datasets. 
+This python binding is developed during our SeFlow work, please cite our paper if you use this package in Python:
 
-This work was partially supported by the Wallenberg AI, Autonomous Systems and Software Program ([WASP](https://wasp-sweden.org/)) funded by the Knut and Alice Wallenberg Foundation including the WASP NEST PerCorSo.
-
-Feel free to explore other projects that use [ufomap](https://github.com/UnknownFreeOccupied/ufomap) (attach code links as follows):
-- [RA-L'24 DUFOMap, Dynamic Awareness]()
-- [RA-L'23 SLICT, SLAM](https://github.com/brytsknguyen/slict)
-- [RA-L'20 UFOMap, Mapping Framework](https://github.com/UnknownFreeOccupied/ufomap)
-
-### Citation
-
-Please cite our works if you find these useful for your research.
-
-```
+```bibtex
+@article{zhang2024seflow,
+  author={Zhang, Qingwen and Yang, Yi and Li, Peizheng and Andersson, Olov and Jensfelt, Patric},
+  title={SeFlow: A Self-Supervised Scene Flow Method in Autonomous Driving},
+  journal={arXiv preprint arXiv:2407.01702},
+  year={2024}
+}
 @article{daniel2024dufomap,
   author={Duberg, Daniel and Zhang, Qingwen and Jia, Mingkai and Jensfelt, Patric},
   journal={IEEE Robotics and Automation Letters}, 
@@ -96,23 +74,5 @@ Please cite our works if you find these useful for your research.
   number={6},
   pages={5038-5045},
   doi={10.1109/LRA.2024.3387658}
-}
-@article{duberg2020ufomap,
-  author={Duberg, Daniel and Jensfelt, Patric},
-  journal={IEEE Robotics and Automation Letters}, 
-  title={{UFOMap}: An Efficient Probabilistic 3D Mapping Framework That Embraces the Unknown}, 
-  year={2020},
-  volume={5},
-  number={4},
-  pages={6411-6418},
-  doi={10.1109/LRA.2020.3013861}
-}
-@inproceedings{zhang2023benchmark,
-  author={Zhang, Qingwen and Duberg, Daniel and Geng, Ruoyu and Jia, Mingkai and Wang, Lujia and Jensfelt, Patric},
-  booktitle={IEEE 26th International Conference on Intelligent Transportation Systems (ITSC)}, 
-  title={A Dynamic Points Removal Benchmark in Point Cloud Maps}, 
-  year={2023},
-  pages={608-614},
-  doi={10.1109/ITSC57777.2023.10422094}
 }
 ```

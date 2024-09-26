@@ -48,3 +48,4 @@ build/*
 
 # Data folder
 data/*
+.DS_Store
