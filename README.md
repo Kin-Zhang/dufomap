@@ -11,13 +11,17 @@
 </p>
 
 [![arXiv](https://img.shields.io/badge/arXiv-2403.01449-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2403.01449)
-[![page](https://img.shields.io/badge/Web-Page-green)](https://KTH-RPL.github.io/dufomap) [video coming soon] [poster coming soon]. Accepted by RA-L'24.
+[![page](https://img.shields.io/badge/Web-Page-green)](https://KTH-RPL.github.io/dufomap)
+[![poster](https://img.shields.io/badge/RAL2024|Poster-6495ed?style=flat&logo=Shotcut&logoColor=wihte)](https://mit-spark.github.io/Longterm-Perception-WS/assets/proceedings/DUFOMap/poster.pdf) [video coming soon]
 
 Quick Demo: Run with the **same parameter setting** without tuning for different sensor (e.g 16, 32, 64, and 128 channel LiDAR and Livox-series mid360), the following shows the data collected from:
 
 | Leica-RTC360 | 128-channel LiDAR | Livox-mid360 |
 | ------- | ------- | ------- |
 | ![](assets/imgs/dufomap_leica.gif) | ![](assets/imgs/doals_train_128.gif) | ![](assets/imgs/two_floor_mid360.gif) |
+
+🚀 2024-11-20: Update dufomap Python API from [SeFlow](https://github.com/KTH-RPL/SeFlow) try it now! `pip install dufomap` and run `python main.py --data_dir data/00` to get the cleaned map directly. Support all >=Python 3.8 in Windows and Linux. Please extract your own data to unified format first follow [this wiki page](https://kth-rpl.github.io/DynamicMap_Benchmark/data/creation/#custom-data).
+
 
 ## 0. Setup
 
