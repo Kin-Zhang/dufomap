@@ -799,7 +799,7 @@ class ReflectionMap
 			if (offsets.all()) {
 				in.read(reflection_[pos].data(), memoryNodeBlock());
 			} else {
-				DataBlock<reflection_t, N> reflection;
+				DataBlock<Reflection, N> reflection;
 				in.read(reflection.data(), memoryNodeBlock());
 				for (offset_t i{}; N != i; ++i) {
 					reflection_[pos][i] = offsets[i] ? reflection[i] : reflection_[pos][i];

@@ -193,6 +193,14 @@ class Buffer
 		ReadBuffer::index_ = 0;
 	}
 
+	// Resize the buffer (allocates capacity and sets size)
+	void resize(std::size_t new_size)
+	{
+		reserve(new_size);
+		WriteBuffer::size_ = new_size;
+		ReadBuffer::size_  = new_size;
+	}
+
 	[[nodiscard]] std::uint8_t* data() override { return WriteBuffer::data(); }
 
 	[[nodiscard]] std::uint8_t const* data() const override { return WriteBuffer::data(); }

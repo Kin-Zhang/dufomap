@@ -4003,6 +4003,7 @@ class Octree
 	void initRoot()
 	{
 		children_[0].fill(NULL_POS);
+		parent_code_[0] = rootCode().parent();  // Initialize root's parent_code
 		modified_[0].reset();
 		derived().initRoot();
 	}
@@ -4710,7 +4711,11 @@ class Octree
 		std::vector<std::pair<pos_t, BitSet<8>>> nodes;
 		nodes.reserve(num_nodes);
 		BitSet<8> const* ptr = tree.get();  // TODO: Look into
+		// std::cerr << "[DEBUG retrieveNodes] Starting with root pos=" << rootIndex().pos << std::endl;
 		retrieveNodesRecurs(rootIndex().pos, ptr, nodes);
+		// std::cerr << "[DEBUG retrieveNodes] Finished, nodes.size()=" << nodes.size() 
+		//           << " children_.size()=" << children_.size() 
+		//           << " parent_code_.size()=" << parent_code_.size() << std::endl;
 		return nodes;
 	}
 

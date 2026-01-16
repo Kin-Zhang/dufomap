@@ -477,18 +477,23 @@ class SeenFreeMap
 
 	void readNodes(ReadBuffer& in, std::ranges::input_range auto r)
 	{
-		// TODO: Implement
-		// for (auto const [pos, offsets] : r) {
-		// 	if (offsets.all()) {
-		// 		in.read(free_[pos].data(), memoryNodeBlock());
-		// 	} else {
-		// 		DataBlock<free_t, N> free;
-		// 		in.read(free.data(), memoryNodeBlock());
-		// 		for (offset_t i{}; N != i; ++i) {
-		// 			free_[pos][i] = offsets[i] ? free[i] : free_[pos][i];
-		// 		}
-		// 	}
-		// }
+		for (auto const [pos, offsets] : r) {
+			if (offsets.all()) {
+				in.read(&seen_free_[pos], memoryNodeBlock());
+			} else {
+				BitSet<N> seen_free;
+				in.read(&seen_free, memoryNodeBlock());
+				for (offset_t i{}; N != i; ++i) {
+					if (offsets[i]) {
+						if (seen_free[i]) {
+							seen_free_[pos].set(i);
+						} else {
+							seen_free_[pos].reset(i);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	void writeNodes(WriteBuffer& out, std::ranges::input_range auto r) const

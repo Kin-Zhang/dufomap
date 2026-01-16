@@ -60,3 +60,4 @@ coverage_report/*
 .coverage/
 
 *.pcd
+*.ufomap

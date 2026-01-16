@@ -446,6 +446,11 @@ int main(int argc, char* argv[])
 	timing[5].stop();
 
 	timing[6].start("write");
+// map.write(path / (config.output.filename + ".ufomap"));
+	// Write with specific map types to match what we use (no compression for debugging)
+	constexpr auto map_types = ufo::MapType::SEEN_FREE | ufo::MapType::REFLECTION | ufo::MapType::LABEL;
+	// file name, depth, compress, map types
+	map.write(path / (config.output.filename + ".ufomap"), 0, false, map_types);
 	ufo::writePointCloudPCD(path / (config.output.filename + ".pcd"), cloud_static);
 	timing[6].stop();
 	timing.stop();

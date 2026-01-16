@@ -111,6 +111,22 @@ target_compile_options(dufomap_run
 	# -march=native
 )
 
+# Add read_ufomap utility
+add_executable(read_ufomap src/read_ufomap.cpp)
+set_target_properties(read_ufomap
+	PROPERTIES
+	VERSION ${PROJECT_VERSION}
+	SOVERSION ${PROJECT_VERSION_MAJOR}
+	CXX_STANDARD 20
+	CXX_STANDARD_REQUIRED YES
+	CXX_EXTENSIONS NO
+)
+target_link_libraries(read_ufomap PRIVATE UFO::Map)
+target_compile_features(read_ufomap
+	PUBLIC
+	cxx_std_20
+)
+
 
 set(UFOMAP_BMI2 FALSE CACHE BOOL "Enable/disable BMI2 instructions")
 

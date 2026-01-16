@@ -279,6 +279,7 @@ class OctreeMap
 
 		Buffer buf;
 		Buffer compress_buf;
+		int section = 0;
 		while (in.tellg() != end_pos && in.good()) {
 			MapType       mt;
 			std::uint64_t data_size;
@@ -403,10 +404,12 @@ class OctreeMap
 		}
 
 		buf.clear();
-		// TODO: Implement better (should probably be resize?)
-		buf.reserve(data_size);
+		buf.resize(data_size);  // Allocate and set size properly
 		in.read(reinterpret_cast<char*>(buf.data()), static_cast<std::streamsize>(data_size));
-		return readNodes(buf, compress_buf, r, mt, data_size, compressed);
+		buf.setReadIndex(0);    // Reset read index to beginning
+		
+		// Cast Buffer to ReadBuffer explicitly
+		return readNodes<Map>(static_cast<ReadBuffer&>(buf), compress_buf, r, mt, data_size, compressed);
 	}
 
 	template <class Map>
@@ -444,7 +447,8 @@ class OctreeMap
 		}
 
 		buf.clear();
-		writeNodes(buf, r, compress, compression_acceleration_level, compression_level);
+		// Cast Buffer to WriteBuffer explicitly
+		writeNodes<Map>(static_cast<WriteBuffer&>(buf), r, compress, map_types, compression_acceleration_level, compression_level);
 
 		if (!buf.empty()) {
 			out.write(reinterpret_cast<char const*>(buf.data()),
