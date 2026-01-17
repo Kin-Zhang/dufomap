@@ -72,14 +72,7 @@ int main(int argc, char* argv[])
     std::cout << "[LOG] Map loaded successfully!" << std::endl;
     std::cout << "      Depth levels: " << +map.depthLevels() << std::endl;
     std::cout << "      Total nodes: " << map.size() << std::endl;
-    
-    // Debug: Check root node state
-    auto root_idx = map.rootIndex();
 
-    // Debug: Count nodes with different predicates
-    std::size_t total_leaf = 0, with_hits = 0, seen_free_count = 0, not_seen_free = 0;
-    std::size_t total_all_nodes = 0;
-    
 
     // Extract voxel centers as point cloud
     ufo::PointCloudColor cloud;
